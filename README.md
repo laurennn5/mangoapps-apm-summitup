@@ -14,6 +14,8 @@ npm ci
 npm run dev
 ```
 
+In GitHub Codespaces, run the commands above from the repository root (usually `/workspaces/mangoapps-apm-summitup`), then open port **5173** from the **Ports** tab using **Open in Browser**.
+
 Vite uses port 5173 by default. On your own computer, open `http://localhost:5173`. In Codex Cloud, open that address inside the environment’s shared desktop browser if a desktop viewer is available; the address does not open the cloud app from your personal browser.
 
 ```sh
@@ -28,20 +30,20 @@ Use **Demo as** in the top-right corner. No password or account registration is 
 
 - **Michael Torres — Operations Manager:** publish to an individual store or all stores; view acknowledgment progress across the entire targeted audience.
 - **Jordan Lee — Store Manager:** publish only to Downtown; view Downtown employee results, including for company-wide announcements.
-- **Drew Johnson — Employee:** receives Downtown and all-store updates. Open an important announcement and select **Acknowledge**. It moves from Attention to Update history with an Acknowledged status.
-- Other store managers and employees remain available for testing store targeting and separate receipts.
+- **Drew Johnson — Employee:** receives Downtown and all-store updates. Select **Review & acknowledge** on a pending Important card, read the full announcement, and select **Acknowledge**. It leaves Attention but stays in Important and All updates with an Acknowledged status.
+- Other store managers and employees remain available for testing store targeting and separate receipts. Operations managers can distinguish employees by the assigned store shown beneath each name in View all, and search by name, store, or status.
 
 For an end-to-end check:
 
 1. As Michael, publish an important announcement to All stores.
-2. As Drew, open it and acknowledge it. Confirm it leaves Attention and remains in history after reload.
+2. As Drew, open it and acknowledge it. Confirm it leaves Attention, retains its Important badge, and remains visible through Important and All updates after reload. Reopen it to reread without another acknowledgment action.
 3. As Jordan, check that it shows **1 of 43** Downtown employees acknowledged. Use **View all** and search for Drew or `pending`.
 4. As Michael, the same announcement shows **1 of 195** employees acknowledged. Switching to another store's employee and acknowledging it increases the company-wide count without changing Jordan's result.
 5. As Jordan, create a Downtown announcement. The audience selector must not offer All stores or other stores. A Westside employee should not see this announcement.
 6. Publish a general update and confirm there is no acknowledgment action or tracking requirement.
 7. Check Important/General filters, search, mobile layout, and dialog dismissal with Escape.
 
-Counts include only targeted records with the employee role: **195 employees across five stores**, plus five store managers. Michael is a separate operations demo identity and is not included in employee denominators. Announcements target all stores when their `storeIds` array is empty. Store managers see their own store's subset of a company-wide audience.
+Counts include only targeted records with the employee role: **195 employees across five stores**, plus five store managers. Store Managers and Operations Managers are excluded from every employee acknowledgment denominator. Michael is a separate operations demo identity. Announcements target all stores when their `storeIds` array is empty. Store managers see their own store's subset of a company-wide audience.
 
 ## Persistence and scope
 

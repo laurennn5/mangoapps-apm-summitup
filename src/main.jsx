@@ -13,7 +13,10 @@ function loadIdentity() {
 function loadData() { try { return readWorkspace(localStorage); } catch { return readWorkspace(null); } }
 const storeName = id => stores.find(store => store.id === id)?.name || 'All stores';
 const audienceLabel = item => item.storeIds.length ? item.storeIds.map(storeName).join(', ') : 'All stores';
-function Avatar({ person }) { return <span className="avatar" style={avatarColors(person)} title={person.name} aria-label={person.name}>{initials(person.name)}</span>; }
+function Avatar({ person, showStore=false }) {
+  const label = showStore && person.storeId ? `${person.name} · ${storeName(person.storeId)}` : person.name;
+  return <span className="avatar" style={avatarColors(person)} title={label} aria-label={label}>{initials(person.name)}</span>;
+}
 function authorFor(item) { return demoIdentities.find(person => person.id === item.authorId) || employees.find(person => person.name === item.author) || { id: `author-${item.author}`, name: item.author }; }
 
 function App() {
@@ -28,15 +31,17 @@ function App() {
   const [page, setPage] = useState(() => isManager(loadIdentity()) ? 'dashboard' : 'feed');
   const [dialog, setDialog] = useState(null);
   const identityRef = useRef(null);
+  const dialogTriggerRef = useRef(null);
   const identityButtonRef = useRef(null);
   const manager = isManager(person);
   const operations = person.role === 'operations';
   const items = workspace.announcements.filter(item => canView(item, person));
   const filtered = items.filter(item => (tab === 'all' || (tab === 'important' ? item.important : !item.important)) && `${item.title} ${item.body} ${item.category}`.toLowerCase().includes(query.toLowerCase()));
   const done = item => hasAcknowledged(workspace.acknowledgments, item, person);
-  const attention = filtered.filter(item => item.important && (manager || !done(item)));
-  const history = manager ? [] : filtered.filter(item => item.important && done(item));
-  const general = filtered.filter(item => !item.important);
+  // Attention is a temporary employee-specific queue, not an announcement category.
+  const attention = manager ? [] : filtered.filter(item => item.important && !done(item));
+  const attentionIds = new Set(attention.map(item => item.id));
+  const remaining = filtered.filter(item => !attentionIds.has(item.id));
   const ordered = [...items.filter(item => item.important), ...items.filter(item => !item.important)];
   const selected = dialog && workspace.announcements.find(item => item.id === dialog.id);
 
@@ -71,13 +76,19 @@ function App() {
     try {
       const receipts = acknowledge(workspace.acknowledgments, selected, person, dialog.id);
       commitWorkspace({ ...workspace, acknowledgments: receipts });
-      setNotice(`Acknowledged “${selected.title}”. It is now in update history.`);
+      setNotice('');
+      // Keep keyboard focus inside the dialog when the confirmation button disappears.
+      document.querySelector('[role="dialog"]')?.focus();
     } catch (error) { setNotice(error.message); }
   }
-  const open = item => setDialog({ type: 'detail', id: item.id });
-  const viewAll = item => setDialog({ type: 'statuses', id: item.id });
+  function openDialog(next) {
+    dialogTriggerRef.current = document.activeElement;
+    setDialog(next);
+  }
+  const open = item => openDialog({ type: 'detail', id: item.id });
+  const viewAll = item => openDialog({ type: 'statuses', id: item.id });
   const tracking = item => <ProgressSummary item={item} viewer={person} receipts={workspace.acknowledgments} onViewAll={() => viewAll(item)}/>;
-  const renderAnnouncement = item => <Announcement key={item.id} item={item} onOpen={() => open(item)} acknowledged={!manager && done(item)} tracking={manager && item.important ? tracking(item) : null}/>;
+  const renderAnnouncement = item => <Announcement key={item.id} item={item} onOpen={() => open(item)} employee={!manager} acknowledged={!manager && done(item)} tracking={manager && item.important ? tracking(item) : null}/>;
   function identityOption(option) { return <button key={option.id} onClick={() => choose(option)} aria-pressed={person.id === option.id}><Avatar person={option}/><span><strong>{option.name}</strong><small>{roleLabel(option)}{option.storeId ? ` · ${storeName(option.storeId)}` : ''}</small></span>{person.id === option.id && <Check size={16} aria-hidden="true"/>}</button>; }
 
   return <div className="app-shell">
@@ -97,41 +108,47 @@ function App() {
         </div>
       </header>
       <main id="main-content" tabIndex={-1}>
-        <div className="heading-actions"><div className="page-heading"><h1>{page === 'dashboard' ? operations ? 'Company overview' : 'Store overview' : 'Updates'}</h1><p>{page === 'dashboard' ? operations ? 'Announcements and employee acknowledgment progress across all stores.' : `${storeName(person.storeId)} · Results are limited to your store’s employees.` : `Hi, ${person.name.split(' ')[0]}. ${operations ? 'Updates across all stores.' : `Here are the updates for ${storeName(person.storeId)}.`}`}</p></div>{manager && <button className="primary-button" onClick={() => setDialog({ type: 'publish' })}><Plus size={17} aria-hidden="true"/>New announcement</button>}</div>
+        <div className="heading-actions"><div className="page-heading"><h1>{page === 'dashboard' ? operations ? 'All stores' : storeName(person.storeId) : 'Updates'}</h1>{page !== 'dashboard' && <p>{`Hi, ${person.name.split(' ')[0]}. ${operations ? 'Updates across all stores.' : `Here are the updates for ${storeName(person.storeId)}.`}`}</p>}</div>{manager && <button className="primary-button" onClick={() => openDialog({ type: 'publish' })}><Plus size={17} aria-hidden="true"/>New announcement</button>}</div>
         {storageError && <p className="storage-warning" role="alert">{storageError}</p>}
         {notice && <p className="notice" role="status">{notice}</p>}
         {page === 'dashboard' && manager ? <section className="manager-panel" aria-labelledby="store-announcements">
-          <div className="panel-heading"><div><h2 id="store-announcements">Announcements</h2><p>{operations ? 'Company-wide results for each targeted audience.' : `Updates for ${storeName(person.storeId)} and all-store announcements.`} Employee counts exclude managers.</p></div><button className="text-button" onClick={() => setPage('feed')}>View updates</button></div>
+          <div className="panel-heading"><h2 id="store-announcements">Announcements</h2><button className="text-button" onClick={() => setPage('feed')}>View updates</button></div>
           <div className="list-columns" aria-hidden="true"><span>Announcement</span><span>Audience</span><span>Published</span></div>
           <div className="manager-list">{ordered.map(item => <article className="manager-announcement" key={item.id}><div className="dashboard-update"><span className="update-summary"><span className="row-category">{item.category}{item.important && <span className="important-label">Important</span>}</span><button className="announcement-title" onClick={() => open(item)}>{item.title}</button></span><span className="row-audience">{audienceLabel(item)}</span><span className="row-date">{item.date}</span></div>{item.important && tracking(item)}</article>)}</div>
         </section> : <div className="feed-column">
           <div className="feed-controls"><div className="tabs" aria-label="Filter announcements">{[['all','All updates'],['important','Important'],['general','General']].map(([value,label]) => <button aria-pressed={tab === value} className={tab === value ? 'selected' : ''} key={value} onClick={() => setTab(value)}>{label}</button>)}</div><label className="search-field"><Search size={18} aria-hidden="true"/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search updates" aria-label="Search announcements"/>{query && <button onClick={() => setQuery('')} aria-label="Clear search"><X size={17} aria-hidden="true"/></button>}</label></div>
           <div className="feed" aria-live="polite">
-            {attention.length > 0 && <section className="announcement-group attention-section" aria-labelledby="attention-heading"><div className="section-heading"><h2 id="attention-heading">Attention</h2><span>{manager ? 'Important updates' : 'Open each update to acknowledge'}</span></div>{attention.map(renderAnnouncement)}</section>}
-            {!manager && !attention.length && !query && tab !== 'general' && <p className="attention-clear">No important updates awaiting your acknowledgment.</p>}
-            {general.length > 0 && <section className="announcement-group" aria-labelledby="general-heading"><div className="section-heading"><h2 id="general-heading">General updates</h2></div>{general.map(renderAnnouncement)}</section>}
-            {history.length > 0 && <section className="announcement-group history-section" aria-labelledby="history-heading"><div className="section-heading"><h2 id="history-heading">Update history</h2><span>Acknowledged updates</span></div>{history.map(renderAnnouncement)}</section>}
+            {attention.length > 0 && <section className="announcement-group attention-section" aria-labelledby="attention-heading"><div className="attention-heading"><h2 id="attention-heading">Attention</h2><p>Open an important update to read and acknowledge it.</p></div>{attention.map(renderAnnouncement)}</section>}
+            {remaining.length > 0 && <section className="announcement-group updates-section" aria-label="Updates">{remaining.map(renderAnnouncement)}</section>}
             {!filtered.length && <div className="empty-state"><h2>No updates found</h2><p>Try a different search or filter.</p><button className="text-button" onClick={() => {setQuery(''); setTab('all');}}>Show all updates</button></div>}
           </div>
         </div>}
         <footer className="about-note">SummitUp combines Summit Retail Group with “sum it up”: a simple place to find important updates.</footer>
       </main>
     </div>
-    {dialog && <Modal key={`${dialog.type}-${dialog.id || ''}`} titleId={dialog.type === 'publish' ? 'publish-title' : dialog.type === 'statuses' ? 'status-title' : 'announcement-title'} onClose={() => setDialog(null)}>
+    {dialog && <Modal key={`${dialog.type}-${dialog.id || ''}`} returnFocusId={dialog.id} returnFocusElement={dialogTriggerRef.current} titleId={dialog.type === 'publish' ? 'publish-title' : dialog.type === 'statuses' ? 'status-title' : 'announcement-title'} onClose={() => setDialog(null)}>
       {dialog.type === 'publish' && manager && <PublishForm person={person} onPublish={publish}/>}
-      {dialog.type === 'detail' && selected && canView(selected, person) && <><Announcement item={selected} expanded acknowledged={!manager && done(selected)} tracking={manager && selected.important ? tracking(selected) : null}/>{!manager && selected.important && !done(selected) && <div className="acknowledge-action"><p>By acknowledging, you confirm you have read this announcement.</p><button className="primary-button" onClick={confirmAcknowledgment}><Check size={18} aria-hidden="true"/>Acknowledge</button></div>}{!selected.important && <p className="detail-note">No acknowledgment required.</p>}</>}
+      {dialog.type === 'detail' && selected && canView(selected, person) && <><Announcement item={selected} expanded employee={!manager} acknowledged={!manager && done(selected)} tracking={manager && selected.important ? tracking(selected) : null}/>{!manager && selected.important && !done(selected) && <div className="acknowledge-action"><button className="primary-button" onClick={confirmAcknowledgment}><Check size={18} aria-hidden="true"/>Acknowledge</button></div>}{!selected.important && <p className="detail-note">No acknowledgment required.</p>}</>}
       {dialog.type === 'statuses' && selected && manager && <StatusList item={selected} viewer={person} receipts={workspace.acknowledgments}/>}
     </Modal>}
   </div>;
 }
 
-function Modal({ titleId, onClose, children }) {
+function Modal({ titleId, returnFocusId, returnFocusElement, onClose, children }) {
   const ref = useRef(null);
   useEffect(() => {
-    const previousFocus = document.activeElement;
+    const previousFocus = returnFocusElement || document.activeElement;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden'; ref.current?.focus();
-    return () => { document.body.style.overflow = previousOverflow; if (previousFocus?.isConnected) previousFocus.focus(); };
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus?.isConnected && previousFocus !== document.body) previousFocus.focus();
+      else {
+        // Acknowledging can move a card out of Attention. Restore focus to its title.
+        const card = [...document.querySelectorAll('.feed [data-announcement-id]')].find(node => node.dataset.announcementId === String(returnFocusId));
+        (card?.querySelector('h3 button') || document.getElementById('main-content'))?.focus();
+      }
+    };
   }, []);
   function handleKey(event) {
     if (event.key === 'Escape') onClose();
@@ -143,16 +160,18 @@ function Modal({ titleId, onClose, children }) {
   }
   return <div className="modal-backdrop" onClick={onClose}><section className="detail-modal" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={ref} onKeyDown={handleKey} onClick={event => event.stopPropagation()}><button className="close-modal" onClick={onClose} aria-label="Close dialog"><X size={22} aria-hidden="true"/></button>{children}</section></div>;
 }
-function Announcement({ item, onOpen, expanded=false, acknowledged=false, tracking }) {
+function Announcement({ item, onOpen, expanded=false, employee=false, acknowledged=false, tracking }) {
   const Heading = expanded ? 'h2' : 'h3';
-  return <article className={`announcement ${item.important ? 'is-important' : ''}`}>
+  return <article className={`announcement ${item.important ? 'is-important' : ''}`} data-announcement-id={item.id}>
     <div className="announcement-top"><span className="category">{item.category}</span>{item.important && <span className="important-label">Important</span>}</div>
     <Heading id={expanded ? 'announcement-title' : undefined}>{expanded ? item.title : <button onClick={onOpen}>{item.title}</button>}</Heading>
     <p className="announcement-body">{item.body}</p>
     {expanded && item.detail && <p className="announcement-detail">{item.detail}</p>}
     {expanded && item.attachment && <div className="attachment"><Paperclip size={17} aria-hidden="true"/><span>{item.attachment}<small>{item.attachmentSize} · Sample attachment, preview unavailable</small></span></div>}
     <div className="announcement-footer"><div className="author-with-avatar"><Avatar person={authorFor(item)}/><div className="author"><strong>{item.author}<span> · {item.authorRole}</span></strong><small>{item.date} at {item.time}</small></div></div><span className="audience">{audienceLabel(item)}</span></div>
-    {acknowledged && <p className="acknowledged-status" role={expanded ? 'status' : undefined}><Check size={17} aria-hidden="true"/>Acknowledged</p>}
+    {employee && item.important && (acknowledged || !expanded) && <div className="employee-card-action">
+      {acknowledged ? <span className="acknowledged-status" role={expanded ? 'status' : undefined}><Check size={17} aria-hidden="true"/>Acknowledged</span> : <button className="text-button review-button" onClick={onOpen}>Review &amp; acknowledge</button>}
+    </div>}
     {tracking}
   </article>;
 }
@@ -162,15 +181,15 @@ function ProgressSummary({ item, viewer, receipts, onViewAll }) {
   return <section className="progress-summary" aria-label={`Acknowledgment progress for ${item.title}`}>
     <div className="progress-heading"><strong>{result.acknowledged} of {result.total} employees acknowledged <span>({result.percentage}%)</span></strong><span className="scope-label">{viewer.role === 'operations' ? 'Targeted audience' : `${storeName(viewer.storeId)} results`}</span></div>
     <progress value={result.acknowledged} max={result.total || 1} aria-label={`${result.percentage}% acknowledged`}/>
-    <div className="progress-people"><div className="avatar-stack">{result.statuses.slice(0, 5).map(person => <Avatar key={person.id} person={person}/>)}</div><button className="text-button" onClick={onViewAll} aria-label={`View all acknowledgment statuses for ${item.title}`}>View all</button></div>
-    <p className="pending-preview">{pending.length ? `Pending: ${pending.slice(0, 3).map(person => person.name).join(', ')}${pending.length > 3 ? ` and ${pending.length - 3} more` : ''}.` : 'All targeted employees have acknowledged.'}</p>
+    <div className="progress-people"><div className="avatar-stack">{result.statuses.slice(0, 5).map(person => <Avatar key={person.id} person={person} showStore={viewer.role === 'operations'}/>)}</div><button className="text-button" onClick={onViewAll} aria-label={`View all acknowledgment statuses for ${item.title}`}>View all</button></div>
+    <p className="pending-preview">{pending.length ? `Pending: ${pending.slice(0, 3).map(person => viewer.role === 'operations' ? `${person.name} (${storeName(person.storeId)})` : person.name).join(', ')}${pending.length > 3 ? ` and ${pending.length - 3} more` : ''}.` : 'All targeted employees have acknowledged.'}</p>
   </section>;
 }
 function StatusList({ item, viewer, receipts }) {
   const [query, setQuery] = useState('');
   const result = progress(item, receipts, viewer);
   const filtered = result.statuses.filter(person => `${person.name} ${storeName(person.storeId)} ${person.acknowledged ? 'acknowledged' : 'pending'}`.toLowerCase().includes(query.trim().toLowerCase())).sort((a,b) => Number(a.acknowledged) - Number(b.acknowledged) || a.name.localeCompare(b.name));
-  return <><h2 id="status-title">Employee acknowledgment status</h2><p className="status-announcement">{item.title}</p><p className="status-totals">{result.acknowledged} of {result.total} targeted employees acknowledged ({result.percentage}%). {viewer.role === 'manager' ? `${storeName(viewer.storeId)} employees only.` : 'All targeted stores.'}</p><label className="search-field status-search"><Search size={18} aria-hidden="true"/><input aria-label="Search employee statuses" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search names, store, or status"/>{query && <button aria-label="Clear employee search" onClick={() => setQuery('')}><X size={17} aria-hidden="true"/></button>}</label><p className="list-count" aria-live="polite">{filtered.length} employees shown · Pending first</p><ul className="employee-status-list">{filtered.map(person => <li key={person.id} data-employee-id={person.id}><Avatar person={person}/><span className="employee-name"><strong>{person.name}</strong><small>{storeName(person.storeId)}</small></span><span className={person.acknowledged ? 'acknowledged-status' : 'pending-status'}>{person.acknowledged && <Check size={15} aria-hidden="true"/>}{person.acknowledged ? 'Acknowledged' : 'Pending'}</span></li>)}</ul>{!filtered.length && <p>No employees match your search.</p>}</>;
+  return <><h2 id="status-title">Employee acknowledgment status</h2><p className="status-announcement">{item.title}</p><p className="status-totals">{result.acknowledged} of {result.total} targeted employees acknowledged ({result.percentage}%). {viewer.role === 'manager' ? `${storeName(viewer.storeId)} employees only.` : 'All targeted stores.'}</p><label className="search-field status-search"><Search size={18} aria-hidden="true"/><input aria-label="Search employee statuses" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search names, store, or status"/>{query && <button aria-label="Clear employee search" onClick={() => setQuery('')}><X size={17} aria-hidden="true"/></button>}</label><p className="list-count" aria-live="polite">{filtered.length} employees shown · Pending first</p><ul className="employee-status-list">{filtered.map(person => <li key={person.id} data-employee-id={person.id}><Avatar person={person} showStore={viewer.role === 'operations'}/><span className="employee-name"><strong>{person.name}</strong><small>{storeName(person.storeId)}</small></span><span className={person.acknowledged ? 'acknowledged-status' : 'pending-status'}>{person.acknowledged && <Check size={15} aria-hidden="true"/>}{person.acknowledged ? 'Acknowledged' : 'Pending'}</span></li>)}</ul>{!filtered.length && <p>No employees match your search.</p>}</>;
 }
 function PublishForm({ person, onPublish }) {
   const [title, setTitle] = useState('');
