@@ -19,6 +19,15 @@ function Avatar({ person, showStore=false }) {
 }
 function authorFor(item) { return demoIdentities.find(person => person.id === item.authorId) || employees.find(person => person.name === item.author) || { id: `author-${item.author}`, name: item.author }; }
 
+// An ascending message silhouette: two summary lines rise toward the summit.
+function SummitLogo() {
+  return <svg className="brand-mark" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+    <path fill="#16365C" d="M8 29h28l-6 8H18l-7.8 4.2A1.5 1.5 0 0 1 8 39.9Z"/>
+    <path fill="#2157A5" d="m6 25.3 13.5-18a3.1 3.1 0 0 1 5 0l13.5 18A4.2 4.2 0 0 1 34.6 32H9.4A4.2 4.2 0 0 1 6 25.3Z"/>
+    <path fill="none" stroke="#EAF2FF" strokeWidth="3" strokeLinecap="round" d="M13 26h13m-8-7h8"/>
+  </svg>;
+}
+
 function App() {
   const [person, setPerson] = useState(loadIdentity);
   const [loaded] = useState(loadData);
@@ -81,6 +90,11 @@ function App() {
       document.querySelector('[role="dialog"]')?.focus();
     } catch (error) { setNotice(error.message); }
   }
+  function goHome(event) {
+    event.preventDefault();
+    setPage(manager ? 'dashboard' : 'feed'); setTab('all'); setQuery(''); setNotice(''); setSwitcher(false);
+    requestAnimationFrame(() => document.getElementById('main-content')?.focus());
+  }
   function openDialog(next) {
     dialogTriggerRef.current = document.activeElement;
     setDialog(next);
@@ -94,7 +108,7 @@ function App() {
   return <div className="app-shell">
     <a className="skip-link" href="#main-content">Skip to content</a>
     <aside className="sidebar" inert={dialog ? true : undefined}>
-      <div className="brand">SummitUp</div><div className="workspace-label">Summit Retail Group</div>
+      <a className="brand-home" href="#main-content" onClick={goHome} aria-label="SummitUp home"><SummitLogo/><span className="brand">SummitUp</span><span className="workspace-label">Summit Retail Group</span></a>
       <nav aria-label="Main navigation">
         {manager && <button className={`nav-item ${page === 'dashboard' ? 'active' : ''}`} aria-current={page === 'dashboard' ? 'page' : undefined} onClick={() => { setPage('dashboard'); setNotice(''); }}><LayoutDashboard size={18} aria-hidden="true"/>Overview</button>}
         <button className={`nav-item ${page === 'feed' ? 'active' : ''}`} aria-current={page === 'feed' ? 'page' : undefined} onClick={() => { setPage('feed'); setNotice(''); }}><Megaphone size={18} aria-hidden="true"/>Updates</button>
@@ -199,10 +213,10 @@ function PublishForm({ person, onPublish }) {
   const [error, setError] = useState('');
   function submit(event) {
     event.preventDefault();
-    try { onPublish({ title, body, storeIds: target === 'all' ? [] : [target], important, category: 'Operations' }); }
+    try { onPublish({ title, body, storeIds: person.role === 'manager' ? [person.storeId] : target === 'all' ? [] : [target], important, category: 'Operations' }); }
     catch (error) { setError(error.message); }
   }
-  return <form className="publish-form" onSubmit={submit}><h2 id="publish-title">New announcement</h2><p>{person.role === 'operations' ? 'Publish to one store or all stores.' : `You can publish only to ${storeName(person.storeId)}.`}</p><label>Title<input required maxLength={120} value={title} onChange={event => setTitle(event.target.value)}/></label><label>Message<textarea required maxLength={5000} rows={6} value={body} onChange={event => setBody(event.target.value)}/></label><label>Audience<select value={target} onChange={event => setTarget(event.target.value)}>{person.role === 'operations' && <option value="all">All stores</option>}{stores.filter(store => person.role === 'operations' || store.id === person.storeId).map(store => <option key={store.id} value={store.id}>{store.name}</option>)}</select></label><label className="checkbox-label"><input type="checkbox" checked={important} onChange={event => setImportant(event.target.checked)}/><span>Important — requires employee acknowledgment</span></label><p className="form-help">{important ? 'Targeted employees must open the announcement before acknowledging.' : 'General update. No acknowledgment required.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<button className="primary-button" type="submit">Publish announcement</button></form>;
+  return <form className="publish-form" onSubmit={submit}><h2 id="publish-title">New announcement</h2><p>{person.role === 'operations' ? 'Publish to one store or all stores.' : `Posting to ${storeName(person.storeId)}`}</p><label>Title<input required maxLength={120} value={title} onChange={event => setTitle(event.target.value)}/></label><label>Message<textarea required maxLength={5000} rows={6} value={body} onChange={event => setBody(event.target.value)}/></label>{person.role === 'operations' && <label>Audience<select value={target} onChange={event => setTarget(event.target.value)}><option value="all">All stores</option>{stores.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}</select></label>}<label className="checkbox-label"><input type="checkbox" checked={important} onChange={event => setImportant(event.target.checked)}/><span>Important — requires employee acknowledgment</span></label><p className="form-help">{important ? 'Targeted employees must open the announcement before acknowledging.' : 'General update. No acknowledgment required.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<button className="primary-button" type="submit">Publish announcement</button></form>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);

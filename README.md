@@ -26,7 +26,7 @@ npm run preview  # Serve the production build on port 4173
 
 ## Try the prototype
 
-Use **Demo as** in the top-right corner. No password or account registration is needed.
+Use **Demo as** in the top-right corner. No password or account registration is needed. The SummitUp logo in the top-left returns managers to their overview and employees to All updates.
 
 - **Michael Torres — Operations Manager:** publish to an individual store or all stores; view acknowledgment progress across the entire targeted audience.
 - **Jordan Lee — Store Manager:** publish only to Downtown; view Downtown employee results, including for company-wide announcements.
@@ -39,7 +39,7 @@ For an end-to-end check:
 2. As Drew, open it and acknowledge it. Confirm it leaves Attention, retains its Important badge, and remains visible through Important and All updates after reload. Reopen it to reread without another acknowledgment action.
 3. As Jordan, check that it shows **1 of 43** Downtown employees acknowledged. Use **View all** and search for Drew or `pending`.
 4. As Michael, the same announcement shows **1 of 195** employees acknowledged. Switching to another store's employee and acknowledging it increases the company-wide count without changing Jordan's result.
-5. As Jordan, create a Downtown announcement. The audience selector must not offer All stores or other stores. A Westside employee should not see this announcement.
+5. As Jordan, create a Downtown announcement. Confirm the form says **Posting to Downtown**, has no Audience selector, and automatically targets Downtown. Other store managers should post automatically to their own store. Michael retains the Audience selector for all five stores and All stores. A Westside employee should not see this announcement.
 6. Publish a general update and confirm there is no acknowledgment action or tracking requirement.
 7. Check Important/General filters, search, mobile layout, and dialog dismissal with Escape.
 

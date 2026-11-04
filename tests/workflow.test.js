@@ -9,6 +9,16 @@ const draft = { title: 'Safety update', body: 'Review the new safety procedures.
 test('publishing permissions cover all three roles and reject invalid audiences', () => {
   assert.ok(canPublish(michael, []));
   for (const store of stores) assert.ok(canPublish(michael, [store.id]));
+  for (const store of stores) {
+    const manager = employees.find(person => person.role === 'manager' && person.storeId === store.id);
+    assert.ok(canPublish(manager, [store.id]));
+    const item = publishAnnouncement(manager, { ...draft, storeIds: [store.id] }, `store-${store.id}`);
+    assert.deepEqual(item.storeIds, [store.id]);
+    assert.throws(() => publishAnnouncement(manager, { ...draft, storeIds: [] }));
+    for (const otherStore of stores.filter(otherStore => otherStore.id !== store.id)) {
+      assert.throws(() => publishAnnouncement(manager, { ...draft, storeIds: [otherStore.id] }));
+    }
+  }
   assert.ok(canPublish(jordan, ['downtown']));
   for (const storeIds of [[], ['westside'], ['downtown', 'westside'], ['downtown', 'downtown'], ['unknown'], undefined]) {
     assert.equal(canPublish(jordan, storeIds), false);
