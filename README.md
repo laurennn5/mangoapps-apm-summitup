@@ -14,7 +14,7 @@ npm ci
 npm run dev
 ```
 
-Vite uses port 5173 by default. Open the running application using your development environment’s port preview, or `http://localhost:5173` when running on your own computer.
+Vite uses port 5173 by default. On your own computer, open `http://localhost:5173`. In Codex Cloud, open that address inside the environment’s shared desktop browser if a desktop viewer is available; the address does not open the cloud app from your personal browser.
 
 ```sh
 npm test         # Validate staff counts, manager identities, and store targeting
@@ -27,7 +27,7 @@ npm run preview  # Serve the production build on port 4173
 - Start as Avery Johnson, a Downtown employee. Browse all updates, filter Important or General, and search by content or category.
 - Open any announcement to read its details; press Escape or close the dialog to return.
 - Use the identity menu in the upper-right corner to choose a manager or employee at any of the five stores.
-- A manager sees an overview with store statistics, relevant announcements, and the five-store directory. Use Announcements to open the same store-scoped employee feed.
+- A manager sees a concise store overview listing relevant announcements, their audiences, and publication dates. Use Updates to open the employee feed.
 - Choose a different store to see its local updates alongside company-wide announcements.
 - Reload to verify that the selected identity persists. To reset, clear the `summitup.identity` localStorage entry. If browser storage is unavailable, switching still works for the current session.
 - Resize to a phone width to check the mobile layout.
