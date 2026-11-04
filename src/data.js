@@ -13,7 +13,10 @@ export const employees = stores.flatMap((store, si) => Array.from({ length: stor
   name: i === 0 ? managers[si] : i === 1 && si === 0 ? 'Avery Johnson' : `${firstNames[(i + si) % 10]} ${lastNames[(Math.floor(i / 10) + si) % 10]}`,
   role: i === 0 ? 'manager' : 'employee', title: i === 0 ? 'Store manager' : ['Sales associate', 'Customer experience associate', 'Stock associate', 'Shift lead'][i % 4],
 })));
-export const demoIdentities = stores.flatMap(store => employees.filter(person => person.storeId === store.id).slice(0, 2));
+export const operationsManager = { id: 'operations-michael', name: 'Michael Torres', role: 'operations', title: 'Operations Manager', storeId: null };
+export const defaultEmployee = employees.find(person => person.id === 'downtown-4'); // Drew Johnson
+export const demoIdentities = [operationsManager, employees[0], defaultEmployee,
+  ...stores.flatMap(store => employees.filter(person => person.storeId === store.id).slice(0, 2)).filter(person => person.id !== employees[0].id)];
 export const announcements = [
   { id: 1, title: 'A safer store starts with all of us', body: 'Our updated emergency procedures are here. Please review the new evacuation routes and assembly points before your next shift. Printed guides are also available in the break room.', category: 'Safety & operations', important: true, author: 'Jordan Lee', authorRole: 'Store manager', date: 'Nov 4, 2026', time: '9:00 AM', storeIds: ['downtown'], icon: 'shield', detail: 'Emergency procedures · November 2026', attachment: 'Emergency procedures.pdf', attachmentSize: '1.2 MB' },
   { id: 2, title: 'Holiday hours: a little planning goes a long way', body: 'The holiday season is almost here! Our updated store hours are ready. Take a look at the schedule and chat with your manager if you have any questions about availability.', category: 'Scheduling', important: true, author: 'Priya Shah', authorRole: 'People & culture', date: 'Nov 3, 2026', time: '2:30 PM', storeIds: [], icon: 'calendar', detail: 'Holiday trading hours · All stores' },

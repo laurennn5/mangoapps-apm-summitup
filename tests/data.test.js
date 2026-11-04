@@ -10,7 +10,9 @@ test('five stores have exactly 200 staff and one manager each', () => {
     const team = employees.filter(person => person.storeId === store.id);
     assert.equal(team.length, store.employees);
     assert.equal(team.filter(person => person.role === 'manager').length, 1);
-    assert.deepEqual(demoIdentities.filter(person => person.storeId === store.id).map(person => person.role), ['manager', 'employee']);
+    assert.ok(demoIdentities.some(person => person.storeId === store.id && person.role === 'manager'));
+    assert.ok(demoIdentities.some(person => person.storeId === store.id && person.role === 'employee'));
+    assert.equal(demoIdentities.filter(person => person.role === 'operations').length, 1);
   }
 });
 

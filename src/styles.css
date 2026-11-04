@@ -21,8 +21,11 @@ button { border-radius: 4px; }
 .skip-link:focus { top: 12px; }
 .app-shell { min-height: 100vh; }
 .sidebar { position: fixed; inset: 0 auto 0 0; width: 216px; background: white; border-right: 1px solid var(--border); padding: 27px 18px; }
-.brand { font-size: 24px; font-weight: 750; color: var(--navy); letter-spacing: -.7px; padding: 0 10px; }
-.workspace-label { font-size: 12px; color: var(--muted); padding: 3px 10px 28px; }
+.brand-home { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 0 10px; margin-bottom: 24px; text-decoration: none; border-radius: 4px; }
+.brand-mark { display: block; width: 38px; height: 38px; margin-bottom: 3px; }
+.brand { font-size: 24px; font-weight: 750; color: var(--navy); letter-spacing: -.7px; line-height: 1.2; }
+.brand-home:hover .brand { color: var(--blue); }
+.workspace-label { font-size: 12px; color: var(--muted); line-height: 1.4; }
 nav { display: flex; flex-direction: column; gap: 6px; }
 .nav-item { display: flex; gap: 10px; align-items: center; min-height: 44px; padding: 10px 12px; text-align: left; font-size: 14px; color: var(--muted); }
 .nav-item.active { color: var(--blue); background: var(--light-blue); font-weight: 600; }
@@ -85,7 +88,7 @@ main:focus { outline: none; }
 .audience { font-size: 12px; color: #43536a; flex-shrink: 0; }
 .manager-panel { border: 1px solid var(--border); border-radius: 6px; background: white; overflow: hidden; }
 .panel-heading { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.panel-heading h2 { color: var(--navy); font-size: 16px; margin: 0 0 4px; font-weight: 600; }
+.panel-heading h2 { color: var(--navy); font-size: 16px; margin: 0; font-weight: 600; }
 .panel-heading p { color: var(--muted); font-size: 13px; margin: 0; }
 .text-button { color: var(--blue); font-size: 13px; min-height: 44px; padding: 8px 12px; border: 1px solid #bdcce0; background: white; flex-shrink: 0; }
 .text-button:hover { background: var(--light-blue); }
@@ -127,8 +130,10 @@ main:focus { outline: none; }
 }
 @media (max-width: 640px) {
   .sidebar { position: static; width: 100%; padding: 14px 16px 0; border-right: 0; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; }
-  .brand { padding: 0; font-size: 22px; }
-  .workspace-label { padding: 0; font-size: 11px; margin-left: auto; }
+  .brand-home { padding: 0; margin-bottom: 0; }
+  .brand-mark { width: 30px; height: 30px; margin-bottom: 1px; }
+  .brand { font-size: 22px; }
+  .workspace-label { font-size: 11px; }
   nav { flex-direction: row; gap: 20px; width: 100%; margin-top: 10px; }
   .nav-item { border-radius: 0; padding: 10px 0; min-height: 44px; font-size: 13px; }
   .nav-item.active { background: none; border-bottom: 2px solid var(--blue); }
@@ -168,3 +173,75 @@ main:focus { outline: none; }
   .modal-backdrop { padding: 12px; }
   .detail-modal .announcement h2 { font-size: 21px; }
 }
+/* Publishing and acknowledgment workflows use the same restrained visual system. */
+.heading-actions { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 10px 15px; border-radius: 5px; font-size: 13px; background: var(--blue); color: white; flex-shrink: 0; }
+.primary-button:hover { background: var(--navy); }
+.identity-menu button { justify-content: flex-start; }
+.identity-menu button > span:nth-child(2) { flex: 1; }
+.identity-menu .avatar { flex-shrink: 0; }
+.identity-text small { max-width: 160px; }
+.author-with-avatar { display: flex; align-items: center; gap: 9px; }
+.avatar { flex-shrink: 0; }
+.author-with-avatar .avatar { width: 28px; height: 28px; font-size: 10px; }
+.manager-announcement { border-top: 1px solid var(--border); }
+.manager-announcement .dashboard-update { border-top: 0; }
+.dashboard-update:hover { background: transparent; }
+.announcement-title { display: block; font-size: 14px; font-weight: 550; color: var(--navy); margin-top: 5px; padding: 0; text-align: left; }
+.announcement-title:hover { color: var(--blue); text-decoration: underline; }
+.progress-summary { border-top: 1px solid var(--border); padding: 14px 0; }
+.manager-announcement .progress-summary { margin: 0 20px; }
+.progress-heading { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between; gap: 5px 12px; font-size: 12px; }
+.progress-heading strong { font-weight: 550; }
+.scope-label { color: var(--muted); font-size: 11px; }
+.progress-summary progress { display: block; height: 5px; width: 100%; margin: 10px 0; border: 0; border-radius: 3px; appearance: none; background: #e7edf5; accent-color: var(--blue); overflow: hidden; }
+progress::-webkit-progress-bar { background: #e7edf5; }
+progress::-webkit-progress-value { background: var(--blue); }
+progress::-moz-progress-bar { background: var(--blue); }
+.progress-people { display: flex; align-items: center; gap: 12px; }
+.avatar-stack { display: flex; gap: 4px; }
+.avatar-stack .avatar { width: 27px; height: 27px; font-size: 10px; }
+.progress-people .text-button { min-height: 36px; padding: 5px 10px; border: 0; text-decoration: underline; }
+.pending-preview { color: var(--muted); font-size: 12px; margin: 7px 0 0; }
+.acknowledged-status { display: inline-flex; gap: 5px; align-items: center; color: var(--blue); font-size: 12px; font-weight: 550; }
+.acknowledge-action { display: flex; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 12px; }
+.status-totals, .status-announcement { font-size: 13px; color: var(--muted); }
+.status-announcement { color: var(--navy); margin: 0 0 8px; }
+.detail-modal > h2, .publish-form h2 { margin: 0 0 12px; color: var(--navy); font-size: 22px; }
+.status-search { width: 100%; }
+.list-count { font-size: 12px; color: var(--muted); }
+.employee-status-list { list-style: none; padding: 0; margin: 0; }
+.employee-status-list li { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-top: 1px solid var(--border); }
+.employee-name { flex: 1; min-width: 0; }
+.employee-name strong { display: block; font-size: 13px; font-weight: 550; }
+.employee-name small { display: block; color: var(--muted); font-size: 11px; }
+.pending-status { font-size: 12px; color: var(--muted); }
+.publish-form { display: flex; flex-direction: column; gap: 15px; }
+.publish-form h2 { margin-bottom: 0; }
+.publish-form > p { margin: 0; font-size: 13px; color: var(--muted); }
+.publish-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 550; }
+.publish-form input:not([type=checkbox]), .publish-form textarea, .publish-form select { width: 100%; min-height: 44px; padding: 9px 10px; border: 1px solid #aebdd0; border-radius: 4px; font: inherit; color: #26364a; background: white; }
+.publish-form textarea { resize: vertical; }
+.publish-form label.checkbox-label { flex-direction: row; align-items: center; gap: 9px; min-height: 44px; }
+.checkbox-label input { width: 18px; height: 18px; accent-color: var(--blue); flex-shrink: 0; }
+.publish-form .primary-button { align-self: flex-start; }
+.storage-warning, .form-error { background: #fff4e6; color: #764913; border: 1px solid #dfc39b; padding: 12px; font-size: 13px; border-radius: 4px; }
+.notice { background: var(--light-blue); color: var(--navy); padding: 12px; font-size: 13px; border-radius: 4px; overflow-wrap: anywhere; }
+.announcement h3, .announcement h2, .announcement-title, .announcement-body, .status-announcement { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .heading-actions { flex-direction: column; gap: 0; margin-bottom: 18px; }
+  .heading-actions .page-heading { margin-bottom: 12px; }
+  .identity-text small { font-size: 10px; }
+  .topbar { gap: 8px; }
+  .workspace-context { font-size: 12px; }
+  .manager-announcement .progress-summary { margin: 0 16px; }
+  .employee-status-list li { flex-wrap: wrap; }
+  .employee-status-list .acknowledged-status, .pending-status { font-size: 11px; }
+}
+
+/* Acknowledgment is an employee status; category badges remain unchanged. */
+.attention-heading h2 { margin: 0; color: var(--navy); font-size: 16px; font-weight: 650; }
+.attention-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.employee-card-action { display: flex; justify-content: flex-end; padding: 0 0 14px; }
+.employee-card-action .acknowledged-status { margin: 0; }
+.review-button { color: var(--blue); }
