@@ -1,52 +1,81 @@
+
 # SummitUp
 
 ## Overview
 
-SummitUp is a mobile-first employee communications prototype built for the MangoApps Associate Product Manager (AI Builder) take-home assessment. It serves Summit Retail Group, a fictional retailer with approximately 200 staff across five stores.
+SummitUp is a responsive employee communications prototype built for the MangoApps Associate Product Manager (AI Builder) take-home assessment. It serves Summit Retail Group, a fictional retailer with approximately 200 staff across five stores.
 
 Workplace updates are scattered across texts, printed notices, and meetings. Employees can miss important information, while managers lack a reliable acknowledgment record. SummitUp brings relevant announcements into one feed and tracks explicit acknowledgment of Important updates.
 
 ## Getting Started
 
-The application uses React 19, Vite 7, JavaScript, and plain CSS, with locally bundled fonts. Use Node.js 22.12+ and npm; this environment was verified with Node.js 24.22.1 and npm 11.9.0.
+### Option 1: GitHub Codespaces (Recommended)
 
-From the repository root:
+You can run SummitUp directly from GitHub without downloading the project to your computer.
 
-```sh
-npm ci
-npm run dev
+1. On this repository's GitHub page, click the green **Code** button.
+2. Select the **Codespaces** tab and click **Create codespace on main**.
+3. Once Codespaces opens, open the terminal (**Terminal → New Terminal**).
+4. Run the following commands:
+
+    ```bash
+    npm ci
+    npm run dev
+    ```
+
+5. Select the **Ports** tab in Codespaces, find port **5173**, and click **Open in Browser**.
+
+SummitUp should now open in a new browser tab.
+
+### Option 2: Run Locally
+
+If you prefer to run the project on your computer:
+
+1. Install [Node.js](https://nodejs.org/) 22.12 or later, which includes npm.
+2. Download or clone this repository and open its folder in a terminal.
+3. Run:
+
+    ```bash
+    npm ci
+    npm run dev
+    ```
+
+4. Open `http://localhost:5173` in your browser. This is the local address where the application runs on your computer.
+
+### Testing and Building
+
+The following commands are optional and can be run from the project folder:
+
+```bash
+npm test          # Run automated tests
+npm run build     # Create a production build
+npm run preview   # Preview the production build
 ```
 
-Open `http://localhost:5173`. In GitHub Codespaces, open port **5173** from the **Ports** tab using **Open in Browser**.
-
-```sh
-npm test         # Run the automated tests
-npm run build    # Create the production bundle in dist/
-npm run preview  # Serve the production bundle on port 4173
-```
-
-Tests cover store targeting, publishing permissions across all five stores, employee-only acknowledgment counts, duplicate prevention, storage round trips, and avatar consistency.
+Automated tests cover store targeting, publishing permissions, acknowledgment tracking, and browser storage.
 
 ## Features
 
-- **Operations Manager:** Publishes to an individual store or all stores. Tracks counts and percentages, with searchable employee status lists showing names, initials avatars, and assigned stores.
-- **Store Manager:** Publishes automatically to their assigned store. Sees that store’s acknowledgment results, including the local response to company-wide announcements.
-- **Employee:** Receives relevant store and company-wide announcements, with search and Important/General filters. Opens Important updates to acknowledge them and can reread completed updates without confirming again.
+- **Operations Manager:** Publishes announcements to an individual store or all stores. Tracks acknowledgment counts and percentages, with searchable employee status lists showing names, initials avatars, and assigned stores.
+- **Store Manager:** Publishes announcements automatically targeted to their assigned store. Views that store's acknowledgment results, including responses to company-wide announcements.
+- **Employee:** Receives relevant store and company-wide announcements, with search and Important/General filters. Opens Important updates to acknowledge them and can revisit acknowledged announcements without confirming again.
 
-The **Demo as** selector lets reviewers switch identities without creating accounts. Announcement and acknowledgment state persists after refresh. Records use stable employee IDs rather than names. Counts exclude managers: the mock roster contains 195 employees and five Store Managers, with a separate Operations Manager identity.
+The **Demo as** selector lets reviewers switch identities without creating accounts. Announcements and acknowledgments persist after refreshing the page. Records use stable employee IDs rather than names.
+
+Acknowledgment counts exclude managers: the mock roster contains 195 employees and five Store Managers, with a separate Operations Manager identity.
 
 ## Product Decisions & Assumptions
 
-The scenario contrasts Rachel’s need for accountability as a Store Manager with Alex’s desire, as a Sales Associate, to avoid interruptions. Only Important announcements require acknowledgment; routine General updates need no confirmation. Attention contains pending Important updates and disappears when no action remains. Acknowledgment changes the employee’s status, not the announcement’s category, so Important updates remain accessible for reference.
+The scenario contrasts Rachel's need for accountability as a Store Manager with Alex's desire, as a Sales Associate, to avoid unnecessary interruptions. Only Important announcements require acknowledgment; routine General updates need no confirmation. The Attention section highlights pending Important updates, which leave the section once acknowledged. Acknowledgment changes the employee's status, not the announcement's category, so Important updates remain accessible for reference.
 
-I assumed each employee has one primary store. Restricting Store Managers to local publishing gives them ownership of relevant updates; reserving company-wide publishing for Operations limits unnecessarily broad messages. These are prototype decisions to validate with the customer.
+I assumed each employee has one primary store. Restricting Store Managers to local publishing gives them ownership of relevant updates, while reserving company-wide publishing for Operations limits unnecessarily broad messages. These are prototype decisions to validate with the customer.
 
 Acknowledgment records an explicit confirmation of reading, not proof of understanding. I prioritized the complete publishing-to-acknowledgment workflow over additional features so reviewers can evaluate this tradeoff directly.
 
 ## Limitations & Future Considerations
 
-Real authentication, account registration, a backend database, cross-device synchronization, push notifications, automated reminders, comments or questions, and profile customization were intentionally excluded to keep the assignment focused. Client-side demo permissions are not a security boundary. The sample PDF has no working download.
+Real authentication, account registration, a backend database, cross-device synchronization, push notifications, automated reminders, employee comments or questions, and profile customization were intentionally excluded to keep the prototype focused within the assignment's development constraints. Client-side demo permissions are not a security boundary.
 
-Mock data and localStorage support this browser only; changes do not synchronize across browsers or devices. If storage is unavailable, changes last for the session. To reset, remove `summitup.workspace.v1` in browser developer tools and reload. Removing `summitup.identity` also resets the selected identity to Drew.
+SummitUp uses mock data and browser `localStorage`, so changes do not synchronize across browsers or devices. If storage is unavailable, changes last only for the current session. To reset demo data, remove `summitup.workspace.v1` in browser developer tools and reload. Removing `summitup.identity` also resets the selected identity to Drew.
 
 Before expanding the product, I would clarify which announcements warrant acknowledgment, whether deadlines or escalation are needed, and how employees should ask follow-up questions or provide feedback.
