@@ -9,6 +9,8 @@ Workplace updates are scattered across texts, printed notices, and meetings. Emp
 
 ## Getting Started
 
+SummitUp is built with React, Vite, JavaScript, and CSS. It requires Node.js 22.12 or later and npm.
+
 ### Option 1: GitHub Codespaces (Recommended)
 
 You can run SummitUp directly from GitHub without downloading the project to your computer.
@@ -75,7 +77,7 @@ Acknowledgment counts exclude managers: the mock roster contains 195 employees a
 
 ## Product Decisions & Assumptions
 
-The scenario contrasts Rachel's need for accountability as a Store Manager with Alex's desire, as a Sales Associate, to avoid unnecessary interruptions. Only Important announcements require acknowledgment; routine General updates need no confirmation. The Attention section highlights pending Important updates, which leave the section once acknowledged. Acknowledgment changes the employee's status, not the announcement's category, so Important updates remain accessible for reference.
+The scenario contrasts Rachel's need for accountability as a Store Manager with Alex's desire, as a Sales Associate, to avoid unnecessary interruptions. Only Important announcements require acknowledgment; routine General updates need no confirmation. The Attention section highlights Important announcements that require acknowledgment. Once acknowledged, these announcements remain accessible under Important and All updates with an Acknowledged status. When no pending announcements remain, the Attention section disappears.
 
 I assumed each employee has one primary store. Restricting Store Managers to local publishing gives them ownership of relevant updates, while reserving company-wide publishing for Operations limits unnecessarily broad messages. These are prototype decisions to validate with the customer.
 
