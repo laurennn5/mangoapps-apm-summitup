@@ -42,6 +42,15 @@ If you prefer to run the project on your computer:
 
 4. Open `http://localhost:5173` in your browser. This is the local address where the application runs on your computer.
 
+### Viewing the Mobile Layout
+
+SummitUp is designed to work on both desktop and mobile screens. To preview the mobile layout on your computer:
+
+1. Open SummitUp in your browser.
+2. Press **F12** or **Ctrl + Shift + I** to open Developer Tools.
+3. Press **Ctrl + Shift + M** to toggle device emulation, or click the phone/tablet icon in Developer Tools.
+4. Select a mobile device or adjust the screen dimensions to explore the responsive layout.
+
 ### Testing and Building
 
 The following commands are optional and can be run from the project folder:
